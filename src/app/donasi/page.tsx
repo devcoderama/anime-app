@@ -18,12 +18,15 @@ import {
   PartyPopper,
 } from "lucide-react";
 
+type LanguageKey = "indonesia" | "english" | "japan";
+
 const DonationQRPage = () => {
-  const [language, setLanguage] = useState("indonesia");
+  const [language, setLanguage] = useState<LanguageKey>("indonesia");
   const [animationState, setAnimationState] = useState(0);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const gratitudeMessages = {
+  const gratitudeMessages: Record<LanguageKey, string[]> = {
     indonesia: [
       "Terima kasih banyak atas donasi Anda!",
       "Setiap kontribusi Anda membuat perbedaan nyata.",
@@ -44,11 +47,16 @@ const DonationQRPage = () => {
     ],
   };
 
-  const languages = [
+  const languages: Array<{ code: LanguageKey; icon: string; name: string }> = [
     { code: "indonesia", icon: "🇮🇩", name: "Indonesia" },
     { code: "english", icon: "🇬🇧", name: "English" },
     { code: "japan", icon: "🇯🇵", name: "日本語" },
   ];
+
+  // Set mounted state to true after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Animasi berputar untuk ikon
   useEffect(() => {
@@ -66,7 +74,7 @@ const DonationQRPage = () => {
   };
 
   // Variasi animasi berdasarkan state
-  const getIconAnimation = (index) => {
+  const getIconAnimation = (index: number): string => {
     const animations = [
       "animate-bounce",
       "animate-pulse",
@@ -76,36 +84,52 @@ const DonationQRPage = () => {
     return animations[(index + animationState) % 4];
   };
 
+  // SSR-safe random number generator
+  const getRandomPosition = (min: number, max: number): number => {
+    return min + Math.random() * (max - min);
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-violet-900 to-fuchsia-900 text-white flex items-center justify-center p-4 overflow-hidden relative">
-        {/* Particle effects background */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full bg-white/20"
-              initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                opacity: 0.2 + Math.random() * 0.3,
-              }}
-              animate={{
-                y: [null, Math.random() * -500],
-                opacity: [null, 0],
-              }}
-              transition={{
-                duration: 5 + Math.random() * 15,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              style={{
-                width: `${2 + Math.random() * 6}px`,
-                height: `${2 + Math.random() * 6}px`,
-              }}
-            />
-          ))}
-        </div>
+        {/* Particle effects background - SSR safe */}
+        {isMounted && (
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(20)].map((_, i) => {
+              // Pre-calculate random values for SSR
+              const randomX = getRandomPosition(0, 100);
+              const randomY = getRandomPosition(0, 100);
+              const randomOpacity = getRandomPosition(0.2, 0.5);
+              const randomSize = getRandomPosition(2, 8);
+              const randomDuration = getRandomPosition(5, 20);
+
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full bg-white/20"
+                  initial={{
+                    x: `${randomX}vw`,
+                    y: `${randomY}vh`,
+                    opacity: randomOpacity,
+                  }}
+                  animate={{
+                    y: [null, `${randomY - 50}vh`],
+                    opacity: [null, 0],
+                  }}
+                  transition={{
+                    duration: randomDuration,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  style={{
+                    width: `${randomSize}px`,
+                    height: `${randomSize}px`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -125,7 +149,7 @@ const DonationQRPage = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {languages.map((lang, index) => (
+            {languages.map((lang) => (
               <motion.button
                 key={lang.code}
                 onClick={() => setLanguage(lang.code)}
@@ -249,12 +273,12 @@ const DonationQRPage = () => {
               </div>
 
               <div>
-                {gratitudeMessages[language].map((message, index) => (
+                {gratitudeMessages[language].map((message, msgIndex) => (
                   <motion.p
-                    key={index}
+                    key={msgIndex}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index + 0.7 }}
+                    transition={{ delay: 0.1 * msgIndex + 0.7 }}
                     className="text-lg font-medium text-gray-200 mb-3 flex items-center"
                   >
                     <CheckCircle2 className="mr-3 w-5 h-5 text-green-400 flex-shrink-0" />
