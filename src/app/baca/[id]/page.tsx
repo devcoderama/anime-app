@@ -1,10 +1,18 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
 import Link from "next/link";
-import { NextImage } from "@/components/NextImage"; // Komponen wrapper untuk next/image
+import MobileButton from "@/components/Button/MobileButton";
+import DesktopButton from "@/components/Button/DesktopButton";
+import {
+  HomeIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  LoadingSpinnerIcon,
+} from "@/components/Icons/NavigationIcons";
 
 // URL API
 const API_URL =
@@ -18,6 +26,67 @@ interface ReadingContent {
   next_chapter: string | null;
   list: string[];
 }
+
+// Komponen DirectImage sederhana di tempat yang sama
+const DirectImage = ({
+  src,
+  alt,
+  className = "",
+  priority = false,
+  onLoad,
+  onError,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+  onLoad?: () => void;
+  onError?: () => void;
+}) => {
+  const [imgSrc, setImgSrc] = useState<string>(src);
+  const [errorCount, setErrorCount] = useState<number>(0);
+  const placeholderImage = "/placeholder.jpg";
+
+  // Reset state jika URL sumber berubah
+  useEffect(() => {
+    setImgSrc(src);
+    setErrorCount(0);
+  }, [src]);
+
+  const handleError = () => {
+    console.log(`Image error level ${errorCount} for: ${alt}`);
+
+    if (errorCount === 0) {
+      // Langsung gunakan URL asli, tanpa proxy API
+      const originalUrl = src.includes("?url=")
+        ? decodeURIComponent(src.split("?url=")[1])
+        : src;
+      setImgSrc(originalUrl);
+      setErrorCount(1);
+    } else if (errorCount === 1) {
+      // Fallback ke placeholder
+      setImgSrc(placeholderImage);
+      setErrorCount(2);
+    }
+
+    // Panggil callback onError jika ada
+    if (onError) {
+      onError();
+    }
+  };
+
+  return (
+    <img
+      src={imgSrc}
+      alt={alt}
+      className={className || "w-full h-auto"}
+      loading={priority ? "eager" : "lazy"}
+      onError={handleError}
+      onLoad={onLoad}
+      style={{ objectFit: "contain", maxWidth: "100%" }}
+    />
+  );
+};
 
 export default function BacaPage() {
   const params = useParams();
@@ -34,13 +103,23 @@ export default function BacaPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<number>(0);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // Fungsi untuk mendapatkan URL yang diproxy untuk mengatasi CORS
-  const getProxiedImageUrl = (originalUrl: string) => {
-    // Encode URL gambar asli untuk digunakan sebagai parameter query
-    const encodedUrl = encodeURIComponent(originalUrl);
-    return `/api/image?url=${encodedUrl}`;
-  };
+  // Cek ukuran layar untuk menentukan tampilan mobile atau desktop
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Set initial value
+    checkIfMobile();
+
+    // Add event listener
+    window.addEventListener("resize", checkIfMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   // Efek untuk mengambil data
   useEffect(() => {
@@ -126,11 +205,23 @@ export default function BacaPage() {
     );
   }
 
+  // Persiapkan URLs untuk chapter navigasi
+  const prevChapterUrl = content.back_chapter
+    ? `/baca/${encodeURIComponent(content.back_chapter.replace(/\/$/, ""))}`
+    : undefined;
+
+  const nextChapterUrl = content.next_chapter
+    ? `/baca/${encodeURIComponent(content.next_chapter.replace(/\/$/, ""))}`
+    : undefined;
+
   // Proses loading gambar
   const loadingProgress =
     content.list.length > 0
       ? Math.round((loadedImages / content.list.length) * 100)
       : 0;
+
+  // Render button yang sesuai berdasarkan screen size
+  const ButtonComponent = isMobile ? MobileButton : DesktopButton;
 
   return (
     <Layout>
@@ -142,64 +233,55 @@ export default function BacaPage() {
           </h1>
         </div>
 
-        {/* Navigasi Chapter */}
+        {/* Navigasi Chapter dengan Komponen Terpisah */}
         <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-          {content.back_chapter ? (
-            <Link
-              href={`/baca/${encodeURIComponent(
-                content.back_chapter.replace(/\/$/, "")
-              )}`}
-              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Chapter Sebelumnya
-            </Link>
-          ) : (
-            <button
-              disabled
-              className="bg-gray-800 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
-            >
-              Chapter Sebelumnya
-            </button>
-          )}
-
-          <Link
-            href="/"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          <ButtonComponent
+            href={prevChapterUrl}
+            disabled={!content.back_chapter}
+            icon={<ArrowLeftIcon />}
+            iconPosition="left"
           >
-            Kembali ke Beranda
-          </Link>
+            Chapter Sebelumnya
+          </ButtonComponent>
 
-          {content.next_chapter ? (
-            <Link
-              href={`/baca/${encodeURIComponent(
-                content.next_chapter.replace(/\/$/, "")
-              )}`}
-              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Chapter Selanjutnya
-            </Link>
-          ) : (
-            <button
-              disabled
-              className="bg-gray-800 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
-            >
-              Chapter Selanjutnya
-            </button>
-          )}
+          <ButtonComponent
+            href="/"
+            variant="primary"
+            icon={<HomeIcon />}
+            iconPosition="left"
+          >
+            Beranda
+          </ButtonComponent>
+
+          <ButtonComponent
+            href={nextChapterUrl}
+            disabled={!content.next_chapter}
+            icon={<ArrowRightIcon />}
+            iconPosition="right"
+          >
+            Chapter Selanjutnya
+          </ButtonComponent>
         </div>
 
         {/* Loading Progress */}
         {loadedImages < content.list.length && (
           <div className="mb-6">
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-gray-300">Memuat gambar...</span>
-              <span className="text-sm text-gray-300">{loadingProgress}%</span>
+              <span className="text-sm text-gray-300 flex items-center">
+                <LoadingSpinnerIcon />
+                Memuat gambar...
+              </span>
+              <span className="text-sm text-white font-semibold bg-blue-600 px-2 py-0.5 rounded-full">
+                {loadingProgress}%
+              </span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-2.5">
+            <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
               <div
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-300 relative"
                 style={{ width: `${loadingProgress}%` }}
-              ></div>
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-blue-300 opacity-30 animate-pulse"></div>
+              </div>
             </div>
           </div>
         )}
@@ -209,11 +291,11 @@ export default function BacaPage() {
           {content.list.map((imageUrl, index) => (
             <div
               key={index}
-              className="w-full max-w-3xl bg-black rounded-lg overflow-hidden"
+              className="w-full max-w-3xl bg-black rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:shadow-blue-500/20"
             >
-              {/* Menggunakan komponen NextImage untuk mengoptimalkan gambar */}
-              <NextImage
-                src={getProxiedImageUrl(imageUrl)}
+              {/* Menggunakan DirectImage */}
+              <DirectImage
+                src={imageUrl}
                 alt={`${content.title} - Page ${index + 1}`}
                 priority={index < 3} // Priority loading untuk 3 gambar pertama
                 className="mx-auto w-full"
@@ -226,48 +308,32 @@ export default function BacaPage() {
 
         {/* Navigasi Bottom Chapter */}
         <div className="flex flex-wrap justify-between items-center mb-8 gap-2">
-          {content.back_chapter ? (
-            <Link
-              href={`/baca/${encodeURIComponent(
-                content.back_chapter.replace(/\/$/, "")
-              )}`}
-              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Chapter Sebelumnya
-            </Link>
-          ) : (
-            <button
-              disabled
-              className="bg-gray-800 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
-            >
-              Chapter Sebelumnya
-            </button>
-          )}
-
-          <Link
-            href="/"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          <ButtonComponent
+            href={prevChapterUrl}
+            disabled={!content.back_chapter}
+            icon={<ArrowLeftIcon />}
+            iconPosition="left"
           >
-            Kembali ke Beranda
-          </Link>
+            Chapter Sebelumnya
+          </ButtonComponent>
 
-          {content.next_chapter ? (
-            <Link
-              href={`/baca/${encodeURIComponent(
-                content.next_chapter.replace(/\/$/, "")
-              )}`}
-              className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Chapter Selanjutnya
-            </Link>
-          ) : (
-            <button
-              disabled
-              className="bg-gray-800 text-gray-500 px-4 py-2 rounded cursor-not-allowed"
-            >
-              Chapter Selanjutnya
-            </button>
-          )}
+          <ButtonComponent
+            href="/"
+            variant="primary"
+            icon={<HomeIcon />}
+            iconPosition="left"
+          >
+            Beranda
+          </ButtonComponent>
+
+          <ButtonComponent
+            href={nextChapterUrl}
+            disabled={!content.next_chapter}
+            icon={<ArrowRightIcon />}
+            iconPosition="right"
+          >
+            Chapter Selanjutnya
+          </ButtonComponent>
         </div>
       </div>
     </Layout>

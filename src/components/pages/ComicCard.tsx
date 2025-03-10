@@ -17,7 +17,7 @@ const ComicCard: React.FC<ComicCardProps> = ({ comic }) => {
 
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-105 hover:shadow-blue-900/20">
-      <Link href={`/komik/${slug}`}>
+      <Link href={`/detail/${slug}`}>
         <div className="relative">
           {/* Gambar Thumbnail */}
           <div className="relative aspect-[2/3] bg-gray-700">
