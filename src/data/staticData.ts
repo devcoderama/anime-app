@@ -1,0 +1,205 @@
+// Data statis untuk fallback jika API gagal diakses
+
+// Tipe data untuk komik
+export interface Comic {
+  link: string;
+  title: string;
+  ratting: string | null;
+  jenis: string | null;
+  view: string | null;
+  type: string | null;
+  status: string | null;
+  chapter: string | null;
+  last_update: string | null;
+  img: string;
+}
+
+// Data komik terbaru dari API
+export const latestComicsData: Comic[] = [
+  {
+    link: "waka-chan-wa-kyou-mo-azatoi/",
+    title: "Waka-chan wa Kyou mo Azatoi",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 218",
+    last_update: "1 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2022/10/Komik-Waka-chan-wa-Kyou-mo-Azatoi-200x285.jpg",
+  },
+  {
+    link: "reincarnation-coliseum/",
+    title: "Reincarnation Coliseum",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 27",
+    last_update: "3 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2022/08/Komik-Reincarnation-Coliseum-203x285.jpg",
+  },
+  {
+    link: "gedou-tenisha-no-harem-dungeon/",
+    title: "Gedou Tenisha no Harem Dungeon Seisakuki",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 15",
+    last_update: "6 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2021/02/Komik-Gedou-Tenisha-no-Harem-Dungeon-201x285.jpg",
+  },
+  {
+    link: "erotical-wizard-with-twelve-brides/",
+    title: "Erotical Wizard With Twelve Brides",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 13.2",
+    last_update: "8 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2023/04/Komik-Erotical-Wizard-With-Twelve-Brides-204x285.jpg",
+  },
+  {
+    link: "zombie-no-afureta-sekai-ore-dake-ga-osowarenai/",
+    title: "Zombie no Afureta Sekai Ore Dake ga Osowarenai",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 38",
+    last_update: "8 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2021/11/Komik-Zombie-no-Afureta-Sekai-Ore-Dake-ga-Osowarenai-199x285.jpg",
+  },
+  {
+    link: "danjohi-139-no-heikou-sekai-wa-omoi-no-hoka-futsuu/",
+    title: "Danjohi 1:39 no Heikou Sekai wa Omoi no Hoka Futsuu",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 215",
+    last_update: "9 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2023/11/Komik-Danjohi-139-no-Heikou-Sekai-wa-Omoi-no-Hoka-Futsuu-202x285.jpg",
+  },
+  {
+    link: "shuu-ni-ichido-classmate-wo-kau-hanashi/",
+    title: "Shuu ni Ichido Classmate wo Kau Hanashi",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 3",
+    last_update: "11 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2024/06/Komik-Shuu-ni-Ichido-Classmate-wo-Kau-Hanashi-202x285.jpg",
+  },
+  {
+    link: "akatsuki-no-majo-reishi-wa-jiyu-ni-ikitai-maou-tobatsu-wo-oetanode-nonbiri-wo-mise-wo-hirakimasu/",
+    title:
+      "Akatsuki no Majo Reishi wa Jiyu ni Ikitai – Maou Tobatsu wo Oetanode, Nonbiri wo Mise wo Hirakimasu",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 3",
+    last_update: "12 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2025/02/Komik-Akatsuki-no-Majo-Reishi-wa-Jiyu-ni-Ikitai-Maou-Tobatsu-wo-Oetanode-Nonbiri-wo-Mise-wo-Hirakimasu-199x285.jpg",
+  },
+  {
+    link: "357386-i-obtained-a-mythic-item/",
+    title: "I Obtained a Mythic Item",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhwa",
+    status: null,
+    chapter: "Ch. 120",
+    last_update: "14 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2022/06/Komik-I-Obtained-a-Mythic-Item-197x285.jpg",
+  },
+  {
+    link: "a-dragonslayers-peerless-regression/",
+    title: "A Dragonslayer's Peerless Regression",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhwa",
+    status: null,
+    chapter: "Ch. 30",
+    last_update: "16 min lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2025/01/Komik-A-Dragonslayers-Peerless-Regression-199x285.jpg",
+  },
+];
+
+// Data komik populer dari API
+export const popularComicsData: Comic[] = [
+  {
+    link: "876169-solo-leveling/",
+    title: "Solo Leveling",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhwa",
+    status: null,
+    chapter: "Ch. 179 End 3 tahun lalu",
+    last_update: "3 tahun lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2020/12/Komik-Solo-Leveling-211x285.jpeg",
+  },
+  {
+    link: "its-over-the-queens-soft-rice-husband-is-actually-invincible/",
+    title: "It's Over! The Queen's Soft Rice Husband is Actually Invincible",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhua",
+    status: null,
+    chapter: "Ch. 390 1 tahun lalu",
+    last_update: "1 tahun lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2023/01/Komik-Its-Over-The-Queens-Soft-Rice-Husband-is-Actually-Invincible-214x285.png",
+  },
+  {
+    link: "high-school-conquest-war-against-the-bullies/",
+    title: "High School Conquest: War Against the Bullies",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhwa",
+    status: null,
+    chapter: "Ch. 9 4 hari lalu",
+    last_update: "4 hari lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2025/02/Komik-High-School-Conquest-The-Battle-Against-the-Bullies-214x278.jpg",
+  },
+  {
+    link: "904336-revenge-of-the-iron-blooded-sword-hound/",
+    title: "Revenge Of The Iron-Blooded Sword Hound",
+    ratting: null,
+    jenis: "Warna",
+    view: null,
+    type: " Manhwa",
+    status: null,
+    chapter: "Ch. 103 2 jam lalu",
+    last_update: "2 jam lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2023/04/Komik-Revenge-Of-The-Iron-Blooded-Sword-Hound-199x285.jpg",
+  },
+  {
+    link: "nito-no-taidana-isekai-shoukougun-sai-jakushoku-healer-nano-ni-saikyou-wa-desu-ka/",
+    title:
+      "Nito no Taidana Isekai Shoukougun: Sai Jakushoku Healer nano ni Saikyou wa desu ka?",
+    ratting: null,
+    jenis: null,
+    view: null,
+    type: " Manga",
+    status: null,
+    chapter: "Ch. 36.1 2 bulan lalu",
+    last_update: "2 bulan lalu",
+    img: "https://komikindo2.com/wp-content/uploads/2020/12/Komik-Nito-no-Taidana-Isekai-Shoukougun-Saijaku-Shoku-Healer-nano-ni-Saikyou-wa-Cheat-desu-ka-200x285.jpg",
+  },
+];
