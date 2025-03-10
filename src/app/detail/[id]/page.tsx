@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
+import Recommendations from "@/components/pages/populer";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -748,42 +749,7 @@ export default function DetailPage() {
           </div>
         </div>
 
-        {/* Bottom recommendations */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white flex items-center">
-              <Sparkles className="w-5 h-5 mr-2 text-yellow-500" />
-              Rekomendasi Untuk Anda
-            </h2>
-            <Link
-              href="/popular"
-              className="text-blue-400 hover:text-blue-300 text-sm flex items-center transition-colors"
-            >
-              <span>Lihat Semua</span>
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Link>
-          </div>
-
-          {/* Placeholder recommendations - Bisa diubah menjadi rekomendasi nyata */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[...Array(6)].map((_, index) => (
-              <div
-                key={index}
-                className="bg-gray-800/60 rounded-xl shadow-lg overflow-hidden group hover:shadow-blue-500/10 transition-all duration-300 hover:scale-105 transform"
-              >
-                <div className="relative h-48 w-full overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-700/50 to-gray-800/50 flex items-center justify-center">
-                    <Eye className="w-8 h-8 text-gray-600" />
-                  </div>
-                </div>
-                <div className="p-3">
-                  <div className="h-4 bg-gray-700 rounded w-full mb-2"></div>
-                  <div className="h-3 bg-gray-700 rounded w-2/3"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Recommendations />
       </div>
 
       {/* CSS tambahan untuk animasi */}
