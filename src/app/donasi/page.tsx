@@ -74,14 +74,14 @@ const DonationQRPage = () => {
   };
 
   // Variasi animasi berdasarkan state
-  const getIconAnimation = (index: number): string => {
+  const getIconAnimation = (iconIndex: number): string => {
     const animations = [
       "animate-bounce",
       "animate-pulse",
       "animate-spin-slow",
       "animate-float",
     ];
-    return animations[(index + animationState) % 4];
+    return animations[(iconIndex + animationState) % 4];
   };
 
   // SSR-safe random number generator
