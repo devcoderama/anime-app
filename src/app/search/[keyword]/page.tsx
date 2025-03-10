@@ -100,7 +100,8 @@ export default function SearchPage() {
                   Tidak Ditemukan
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  Tidak ada komik yang ditemukan untuk kata kunci "{keyword}".
+                  Tidak ada komik yang ditemukan untuk kata kunci &quot;
+                  {keyword}&quot;.
                 </p>
                 <Link
                   href="/"

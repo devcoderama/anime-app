@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
 import ComicCard from "@/components/pages/ComicCard";
 import Link from "next/link";
-import { Comic, latestComicsData } from "@/data/staticData";
+import { latestComicsData } from "@/data/staticData";
+import { Comic } from "@/types/comic"; // Impor dari file tipe yang sudah kita buat sebelumnya
 
 // URL API
 const API_URL =
@@ -35,8 +36,8 @@ const Pagination = ({
       pages.push(1);
 
       // Hitung awal dan akhir rentang halaman di sekitar halaman saat ini
-      let start = Math.max(2, currentPage - 1);
-      let end = Math.min(totalPages - 1, currentPage + 1);
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
 
       // Tambahkan elipsis setelah halaman pertama jika diperlukan
       if (start > 2) {

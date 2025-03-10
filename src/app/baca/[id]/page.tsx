@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
-import Image from "next/image";
 import Link from "next/link";
+import { NextImage } from "@/components/NextImage"; // Komponen wrapper untuk next/image
 
 // URL API
 const API_URL =
@@ -21,7 +21,6 @@ interface ReadingContent {
 
 export default function BacaPage() {
   const params = useParams();
-  const router = useRouter();
   let id = params.id as string;
 
   // Perbaikan: Hapus trailing slash jika ada
@@ -40,7 +39,7 @@ export default function BacaPage() {
   const getProxiedImageUrl = (originalUrl: string) => {
     // Encode URL gambar asli untuk digunakan sebagai parameter query
     const encodedUrl = encodeURIComponent(originalUrl);
-    return `/api/imageproxy?url=${encodedUrl}`;
+    return `/api/image?url=${encodedUrl}`;
   };
 
   // Efek untuk mengambil data
@@ -212,22 +211,14 @@ export default function BacaPage() {
               key={index}
               className="w-full max-w-3xl bg-black rounded-lg overflow-hidden"
             >
-              {/* Gunakan img tag standard untuk menghindari masalah dengan next/image */}
-              <img
+              {/* Menggunakan komponen NextImage untuk mengoptimalkan gambar */}
+              <NextImage
                 src={getProxiedImageUrl(imageUrl)}
                 alt={`${content.title} - Page ${index + 1}`}
+                priority={index < 3} // Priority loading untuk 3 gambar pertama
                 className="mx-auto w-full"
-                loading={index < 3 ? "eager" : "lazy"}
                 onLoad={handleImageLoad}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/placeholder.jpg";
-                  handleImageLoad();
-                }}
-                style={{
-                  display: "block",
-                  maxWidth: "100%",
-                }}
+                onError={handleImageLoad}
               />
             </div>
           ))}

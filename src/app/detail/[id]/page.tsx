@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
 import Image from "next/image";
 import Link from "next/link";
-import ComicCard from "@/components/pages/ComicCard";
 
 // URL API
 const API_URL =

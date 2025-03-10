@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Link from "next/link";
-import { Book, Loader2, AlertTriangle, Tag, TrendingUp } from "lucide-react";
+import { Book, AlertTriangle, Tag, TrendingUp } from "lucide-react";
 
 // URL API
 const API_URL =
@@ -38,7 +38,6 @@ export default function GenresPage() {
   const [genres, setGenres] = useState<string[]>(DEFAULT_GENRES);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [hoveredGenre, setHoveredGenre] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -133,8 +132,6 @@ export default function GenresPage() {
                   h-24 relative overflow-hidden
                   group
                 `}
-                onMouseEnter={() => setHoveredGenre(genre)}
-                onMouseLeave={() => setHoveredGenre(null)}
               >
                 {/* Background animation */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
