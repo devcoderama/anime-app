@@ -19,6 +19,9 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "https://laravel-api-manga-scraper.vercel.app/api/api";
 
+// URL untuk image proxy
+const IMAGE_PROXY_URL = process.env.NEXT_PUBLIC_IMAGE_PROXY_URL || "/api/image";
+
 // Interface untuk konten baca
 interface ReadingContent {
   title: string;
@@ -27,7 +30,7 @@ interface ReadingContent {
   list: string[];
 }
 
-// Komponen DirectImage sederhana di tempat yang sama
+// Komponen DirectImage yang ditingkatkan dengan strategi fallback
 const DirectImage = ({
   src,
   alt,
@@ -43,48 +46,83 @@ const DirectImage = ({
   onLoad?: () => void;
   onError?: () => void;
 }) => {
-  const [imgSrc, setImgSrc] = useState<string>(src);
+  const [imgSrc, setImgSrc] = useState<string>("");
   const [errorCount, setErrorCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const placeholderImage = "/placeholder.jpg";
 
   // Reset state jika URL sumber berubah
   useEffect(() => {
-    setImgSrc(src);
+    setLoading(true);
     setErrorCount(0);
+
+    // Cek apakah URL sudah menggunakan proxy atau belum
+    if (src.startsWith(IMAGE_PROXY_URL) || src.includes("?url=")) {
+      setImgSrc(src);
+    } else {
+      // Jika belum, gunakan proxy untuk URL eksternal
+      setImgSrc(`${IMAGE_PROXY_URL}?url=${encodeURIComponent(src)}`);
+    }
   }, [src]);
 
   const handleError = () => {
     console.log(`Image error level ${errorCount} for: ${alt}`);
+    setLoading(false);
 
     if (errorCount === 0) {
-      // Langsung gunakan URL asli, tanpa proxy API
-      const originalUrl = src.includes("?url=")
-        ? decodeURIComponent(src.split("?url=")[1])
-        : src;
-      setImgSrc(originalUrl);
+      // Jika error pertama, coba gunakan proxy dengan strategi berbeda
+      // Dengan menambahkan parameter strategi untuk memicu penggunaan strategi yang berbeda
+      const proxyWithStrategy = `${IMAGE_PROXY_URL}?url=${encodeURIComponent(
+        src
+      )}&strategy=${Date.now()}`;
+      setImgSrc(proxyWithStrategy);
       setErrorCount(1);
     } else if (errorCount === 1) {
+      // Jika masih error, coba URL asli tanpa proxy
+      setImgSrc(src);
+      setErrorCount(2);
+    } else if (errorCount === 2) {
+      // Coba URL asli dengan parameter nocache untuk memaksa refresh
+      setImgSrc(`${src}${src.includes("?") ? "&" : "?"}nocache=${Date.now()}`);
+      setErrorCount(3);
+    } else {
       // Fallback ke placeholder
       setImgSrc(placeholderImage);
-      setErrorCount(2);
-    }
+      setErrorCount(4);
 
-    // Panggil callback onError jika ada
-    if (onError) {
-      onError();
+      // Panggil callback onError jika ada
+      if (onError) {
+        onError();
+      }
+    }
+  };
+
+  const handleLoad = () => {
+    setLoading(false);
+    if (onLoad) {
+      onLoad();
     }
   };
 
   return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      className={className || "w-full h-auto"}
-      loading={priority ? "eager" : "lazy"}
-      onError={handleError}
-      onLoad={onLoad}
-      style={{ objectFit: "contain", maxWidth: "100%" }}
-    />
+    <div className="relative w-full">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={`${className || "w-full h-auto"} ${
+          loading ? "opacity-30" : "opacity-100"
+        }`}
+        loading={priority ? "eager" : "lazy"}
+        onError={handleError}
+        onLoad={handleLoad}
+        style={{ objectFit: "contain", maxWidth: "100%" }}
+      />
+    </div>
   );
 };
 
@@ -103,6 +141,7 @@ export default function BacaPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<number>(0);
+  const [failedImages, setFailedImages] = useState<number>(0);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Cek ukuran layar untuk menentukan tampilan mobile atau desktop
@@ -127,6 +166,7 @@ export default function BacaPage() {
       setIsLoading(true);
       setError(null);
       setLoadedImages(0);
+      setFailedImages(0);
 
       try {
         const response = await fetch(`${API_URL}/baca/${id}`);
@@ -157,6 +197,13 @@ export default function BacaPage() {
 
   // Handler untuk mencatat jumlah gambar yang telah dimuat
   const handleImageLoad = () => {
+    setLoadedImages((prev) => prev + 1);
+  };
+
+  // Handler untuk mencatat gambar yang gagal dimuat
+  const handleImageError = () => {
+    setFailedImages((prev) => prev + 1);
+    // Tetap increment loaded karena kita menganggap gambar "loaded" meskipun dengan placeholder
     setLoadedImages((prev) => prev + 1);
   };
 
@@ -286,21 +333,32 @@ export default function BacaPage() {
           </div>
         )}
 
-        {/* Semua Gambar Komik */}
-        <div className="flex flex-col items-center space-y-4 mb-6">
+        {/* Info tentang gambar yang gagal dimuat */}
+        {failedImages > 0 && (
+          <div className="bg-yellow-800 bg-opacity-40 border border-yellow-600 text-yellow-200 px-4 py-3 rounded mb-6 text-sm">
+            <p>
+              <strong>Catatan:</strong> {failedImages} gambar tidak dapat dimuat
+              dengan benar dan digantikan dengan placeholder.
+            </p>
+          </div>
+        )}
+
+        {/* Semua Gambar Komik - Tanpa Jarak Sama Sekali */}
+        <div className="flex flex-col items-center bg-black rounded-lg overflow-hidden mb-6">
           {content.list.map((imageUrl, index) => (
             <div
               key={index}
-              className="w-full max-w-3xl bg-black rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:shadow-blue-500/20"
+              className="w-full max-w-3xl"
+              style={{ margin: 0, padding: 0, lineHeight: 0 }}
             >
-              {/* Menggunakan DirectImage */}
+              {/* Menggunakan DirectImage dengan proxy dan strategi fallback */}
               <DirectImage
                 src={imageUrl}
                 alt={`${content.title} - Page ${index + 1}`}
                 priority={index < 3} // Priority loading untuk 3 gambar pertama
                 className="mx-auto w-full"
                 onLoad={handleImageLoad}
-                onError={handleImageLoad}
+                onError={handleImageError}
               />
             </div>
           ))}
