@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
 
     // Untuk domain lainnya, gunakan pendekatan reguler
     return await handleRegularDomain(decodedUrl, domain, origin, request);
-  } catch (error) {
+  } catch (err) {
     // Tangkap dan catat detail error
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = err instanceof Error ? err.message : String(err);
     console.error(`Error proxy gambar: ${errorMessage}`);
 
     // Redirect ke placeholder
@@ -86,7 +86,7 @@ async function handleK7Domain(
         console.log(`Strategi tersimpan berhasil!`);
         return await processSuccessfulResponse(response, domain);
       }
-    } catch (error) {
+    } catch {
       console.log("Strategi tersimpan gagal, mencoba strategi baru...");
       // Lanjutkan dengan strategi baru jika strategi tersimpan gagal
     }
@@ -152,8 +152,10 @@ async function handleK7Domain(
           console.log(`Mendapatkan token: ${token}`);
         }
       }
-    } catch (pingError) {
-      console.log("Ping untuk cookie gagal:", pingError.message);
+    } catch (err) {
+      // Perbaikan: Penggunaan instanceof untuk menangani error dengan aman
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.log("Ping untuk cookie gagal:", errorMessage);
     }
 
     // Jika tidak ada cookie, buat cookie simulasi
@@ -182,7 +184,6 @@ async function handleK7Domain(
       "curl_minimal",
     ];
 
-    let successfulStrategy = null;
     let successResponse = null;
 
     // Coba setiap strategi secara berurutan
@@ -195,7 +196,6 @@ async function handleK7Domain(
 
         if (response.ok || response.status === 304) {
           console.log(`Strategi ${strategy} berhasil!`);
-          successfulStrategy = strategy;
           successResponse = response;
 
           // Simpan strategi yang berhasil ke cache
@@ -210,11 +210,10 @@ async function handleK7Domain(
             `Strategi ${strategy} gagal dengan status: ${response.status}`
           );
         }
-      } catch (strategyError) {
-        console.log(
-          `Error dengan strategi ${strategy}:`,
-          strategyError.message
-        );
+      } catch (err) {
+        // Perbaikan: Penggunaan instanceof untuk menangani error dengan aman
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.log(`Error dengan strategi ${strategy}:`, errorMessage);
       }
     }
 
@@ -241,7 +240,6 @@ async function handleK7Domain(
         if (response.ok || response.status === 304) {
           console.log("Pendekatan terakhir berhasil!");
           successResponse = response;
-          successfulStrategy = "googlebot";
 
           // Simpan strategi yang berhasil ke cache
           successCache[pathBase] = {
@@ -250,8 +248,10 @@ async function handleK7Domain(
             timestamp: Date.now(),
           };
         }
-      } catch (lastError) {
-        console.log("Pendekatan terakhir gagal:", lastError.message);
+      } catch (err) {
+        // Perbaikan: Penggunaan instanceof untuk menangani error dengan aman
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.log("Pendekatan terakhir gagal:", errorMessage);
       }
     }
 
@@ -267,11 +267,9 @@ async function handleK7Domain(
     return NextResponse.redirect(
       new URL(`/api/placeholder/${width}/${height}`, request.nextUrl.origin)
     );
-  } catch (error) {
+  } catch (err) {
     console.error(
-      `Error domain K7: ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `Error domain K7: ${err instanceof Error ? err.message : String(err)}`
     );
     const width = request.nextUrl.searchParams.get("w") || "400";
     const height = request.nextUrl.searchParams.get("h") || "300";
@@ -290,7 +288,7 @@ function getPathBase(url: string): string {
     // Hapus nama file (bagian terakhir dari path)
     pathParts.pop();
     return urlObj.origin + pathParts.join("/");
-  } catch (e) {
+  } catch {
     return url;
   }
 }
@@ -631,10 +629,10 @@ async function handleRegularDomain(
 
     // Untuk status lain, coba proses respons tersebut
     return await processSuccessfulResponse(response, domain);
-  } catch (error) {
+  } catch (err) {
     console.error(
       `Error domain reguler: ${
-        error instanceof Error ? error.message : String(error)
+        err instanceof Error ? err.message : String(err)
       }`
     );
     const width = request.nextUrl.searchParams.get("w") || "400";
